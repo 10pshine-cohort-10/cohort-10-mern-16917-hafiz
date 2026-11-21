@@ -1,7 +1,7 @@
-const assert = require('node:assert');
+import { expect } from 'chai';
 
 describe('Sanity check', () => {
   it('runs the Mocha test suite', () => {
-    assert.strictEqual(1 + 1, 2);
+    expect(1 + 1).to.equal(2);
   });
 });
