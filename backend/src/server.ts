@@ -18,8 +18,13 @@ const start = async (): Promise<void> => {
     const shutdown = (signal: string): void => {
       logger.info(`${signal} received, shutting down gracefully`);
       server.close(async () => {
-        await sequelize.close();
-        process.exit(0);
+        try {
+          await sequelize.close();
+          process.exit(0);
+        } catch (error) {
+          logger.error({ err: error }, 'Failed to close database connection');
+          process.exit(1);
+        }
       });
     };
     process.on('SIGINT', () => shutdown('SIGINT'));
