@@ -20,7 +20,18 @@ describe('sanitize utils', () => {
   });
 
   it('never returns a title longer than the database column', () => {
-    const title = sanitizeTitle('&'.repeat(300));
-    expect(title.length).to.equal(MAX_TITLE_LENGTH);
+    expect(sanitizeTitle('&'.repeat(300)).length).to.equal(MAX_TITLE_LENGTH);
+  });
+
+  it('is idempotent, so exported titles survive a re-import unchanged', () => {
+    const samples = ['&lt;b&gt;Plan&lt;/b&gt;', '<b>Plan</b>', 'Tom & Jerry', 'a < b and c > d', '  padded  '];
+    samples.forEach((sample) => {
+      const once = sanitizeTitle(sample);
+      expect(sanitizeTitle(once)).to.equal(once);
+    });
+  });
+
+  it('keeps escaped text that is not real markup exactly as typed', () => {
+    expect(sanitizeTitle('&lt;b&gt;Plan&lt;/b&gt;')).to.equal('&lt;b&gt;Plan&lt;/b&gt;');
   });
 });
