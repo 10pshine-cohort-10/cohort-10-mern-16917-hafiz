@@ -1,5 +1,6 @@
 import app from './app';
 import sequelize from './config/database';
+import './models';
 import logger from './config/logger';
 import env from './config/env';
 
@@ -11,7 +12,12 @@ const start = async (): Promise<void> => {
     await sequelize.sync();
     logger.info('Database synced');
 
-    const server = app.listen(env.port, () => {
+    const server = app.listen(env.port, (error?: Error) => {
+      if (error) {
+        logger.fatal({ err: error }, 'Failed to bind server port');
+        void sequelize.close().finally(() => process.exit(1));
+        return;
+      }
       logger.info(`Server running on http://localhost:${env.port}`);
     });
 

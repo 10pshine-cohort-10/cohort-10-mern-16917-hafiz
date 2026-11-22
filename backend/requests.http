@@ -1,0 +1,52 @@
+@baseUrl = http://localhost:5000/api
+
+### Health check
+GET {{baseUrl}}/health
+
+### Signup
+POST {{baseUrl}}/auth/signup
+Content-Type: application/json
+
+{ "name": "Hafiz", "email": "thehmfpk@gmail.com", "password": "hmf12345" }
+
+### Login
+# @name login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{ "email": "thehmfpk@gmail.com", "password": "hmf12345" }
+
+### Profile
+GET {{baseUrl}}/auth/me
+Authorization: Bearer {{login.response.body.data.token}}
+
+### Create note
+# @name created
+POST {{baseUrl}}/notes
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.data.token}}
+
+{ "title": "My first note", "content": "<p>Hello <strong>world</strong></p>", "color": "blue", "isPinned": true }
+
+### List notes (optional ?search=hello&pinned=true)
+GET {{baseUrl}}/notes?search=hello
+Authorization: Bearer {{login.response.body.data.token}}
+
+### Get one note
+GET {{baseUrl}}/notes/{{created.response.body.data.note.id}}
+Authorization: Bearer {{login.response.body.data.token}}
+
+### Update note
+PUT {{baseUrl}}/notes/{{created.response.body.data.note.id}}
+Content-Type: application/json
+Authorization: Bearer {{login.response.body.data.token}}
+
+{ "title": "Renamed note", "color": "green" }
+
+### Export notes
+GET {{baseUrl}}/notes/export
+Authorization: Bearer {{login.response.body.data.token}}
+
+### Delete note
+DELETE {{baseUrl}}/notes/{{created.response.body.data.note.id}}
+Authorization: Bearer {{login.response.body.data.token}}
