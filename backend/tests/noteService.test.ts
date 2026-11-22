@@ -36,11 +36,11 @@ describe('noteService', () => {
     });
   });
 
-  it('create strips scripts from content and tags from the title', () => {
+  it('create strips scripts from content and trims the title', () => {
     const stub = sinon.stub(noteRepository, 'create').resolves(fakeNote());
     return noteService
       .create(7, {
-        title: '<b>Hi</b>',
+        title: '  Hi  ',
         content: '<p>ok</p><script>alert(1)</script><img src=x onerror=alert(1)>',
         color: 'blue',
         isPinned: false,
@@ -91,6 +91,16 @@ describe('noteService', () => {
     return noteService.exportAll(7).then((exported) => {
       expect(exported[0]).to.have.all.keys('title', 'content', 'color', 'isPinned');
     });
+  });
+
+  it('importing an exported title keeps it exactly as exported', () => {
+    const exportedTitle = '&lt;b&gt;Plan&lt;/b&gt; & more';
+    const stub = sinon.stub(noteRepository, 'bulkCreate').resolves([fakeNote()]);
+    return noteService
+      .importMany(7, [{ title: exportedTitle, content: '<p>a</p>', color: 'default', isPinned: false }])
+      .then(() => {
+        expect(stub.firstCall.args[1][0].title).to.equal(exportedTitle);
+      });
   });
 
   it('importMany returns the number of imported notes', () => {

@@ -24,6 +24,17 @@ describe('validators', () => {
     expect(value).to.deep.equal({ title: 'Untitled', content: '', color: 'default', isPinned: false });
   });
 
+  it('rejects titles containing angle brackets everywhere a title is accepted', () => {
+    const bad = '<span title="a < b">Plan</span>';
+    expect(createNoteSchema.validate({ title: bad }).error).to.not.equal(undefined);
+    expect(updateNoteSchema.validate({ title: bad }).error).to.not.equal(undefined);
+    expect(importNotesSchema.validate({ notes: [{ title: bad }] }).error).to.not.equal(undefined);
+  });
+
+  it('accepts ordinary titles with symbols', () => {
+    expect(createNoteSchema.validate({ title: 'Tom & Jerry: 50% off!' }).error).to.equal(undefined);
+  });
+
   it('rejects an empty update and an empty import', () => {
     expect(updateNoteSchema.validate({}).error).to.not.equal(undefined);
     expect(importNotesSchema.validate({ notes: [] }).error).to.not.equal(undefined);

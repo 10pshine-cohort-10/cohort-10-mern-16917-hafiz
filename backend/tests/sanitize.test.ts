@@ -11,12 +11,22 @@ describe('sanitize utils', () => {
     expect(sanitizeContent(dirty)).to.equal('<p>Hi</p>');
   });
 
-  it('strips all tags from titles', () => {
-    expect(sanitizeTitle('<b>Plan</b> <i>A</i>')).to.equal('Plan A');
-  });
-
   it('keeps ampersands and quotes in titles as plain characters', () => {
     expect(sanitizeTitle('Tom & Jerry "live"')).to.equal('Tom & Jerry "live"');
+  });
+
+  it('never lets markup survive in a title', () => {
+    const attacks = [
+      '<span title="a < b">Plan</span>',
+      '<img src=x onerror="alert(1)// < 2">',
+      '<<b>script>alert(1)</script>',
+      '<b>Plan</b>',
+    ];
+    attacks.forEach((attack) => {
+      const cleaned = sanitizeTitle(attack);
+      expect(cleaned).to.not.contain('<');
+      expect(cleaned).to.not.contain('>');
+    });
   });
 
   it('never returns a title longer than the database column', () => {
@@ -24,26 +34,14 @@ describe('sanitize utils', () => {
   });
 
   it('is idempotent, so exported titles survive a re-import unchanged', () => {
-    const samples = [
-      '&lt;b&gt;Plan&lt;/b&gt;',
-      '<b>Plan</b>',
-      'Tom & Jerry',
-      'a < b and c > d',
-      '<<b>script>x</script>',
-      '  padded  ',
-    ];
+    const samples = ['&lt;b&gt;Plan&lt;/b&gt;', 'Tom & Jerry', '<b>Plan</b>', `${'x'.repeat(254)} y`, '  padded  '];
     samples.forEach((sample) => {
       const once = sanitizeTitle(sample);
       expect(sanitizeTitle(once)).to.equal(once);
     });
   });
 
-  it('keeps comparison text that only looks like markup', () => {
-    expect(sanitizeTitle('a < b and c > d')).to.equal('a < b and c > d');
-    expect(sanitizeTitle('x <3 y > z')).to.equal('x <3 y > z');
-  });
-
-  it('keeps escaped text that is not real markup exactly as typed', () => {
+  it('keeps escaped text exactly as typed', () => {
     expect(sanitizeTitle('&lt;b&gt;Plan&lt;/b&gt;')).to.equal('&lt;b&gt;Plan&lt;/b&gt;');
   });
 });

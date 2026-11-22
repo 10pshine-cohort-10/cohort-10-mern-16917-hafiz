@@ -7,25 +7,17 @@ const ALLOWED_TAGS = [
 
 export const MAX_TITLE_LENGTH = 255;
 
-// Matches real HTML tags only: "<" (or "</") must be followed by a letter, so "a < b and c > d" is untouched.
-const TAG_PATTERN = /<\/?[A-Za-z][^<>]*>/g;
+const ANGLE_BRACKETS = /[<>]/g;
 
 /** Rich-text notes are stored as HTML, so strip everything except a safe whitelist. */
 export const sanitizeContent = (html: string): string =>
   sanitizeHtml(html, { allowedTags: ALLOWED_TAGS, allowedAttributes: {} });
 
 /**
- * Titles are plain text. Markup is removed and the length is capped, but characters are never
- * escaped or decoded, so the result is a fixed point: cleaning an already clean title (for
- * example one that was exported and is now imported again) returns it unchanged.
- * Titles must be rendered as text (React escapes them), never as HTML.
+ * Titles are plain text and can never contain markup: the API rejects "<" and ">" in titles
+ * (see noteValidators), and this function removes them again as defence in depth. No tag
+ * parsing is needed, characters are never escaped or decoded, and the result is idempotent,
+ * so an exported title re-imports unchanged. Titles must still be rendered as text.
  */
-export const sanitizeTitle = (title: string): string => {
-  let result = title;
-  let previous: string;
-  do {
-    previous = result;
-    result = result.replace(TAG_PATTERN, '');
-  } while (result !== previous);
-  return result.slice(0, MAX_TITLE_LENGTH).trim();
-};
+export const sanitizeTitle = (title: string): string =>
+  title.replace(ANGLE_BRACKETS, '').slice(0, MAX_TITLE_LENGTH).trim();

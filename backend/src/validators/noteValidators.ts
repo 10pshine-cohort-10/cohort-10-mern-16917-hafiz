@@ -2,7 +2,12 @@ import Joi from 'joi';
 import { NOTE_COLORS } from '../models/Note';
 
 const noteFields = {
-  title: Joi.string().trim().allow('').max(255),
+  title: Joi.string()
+    .trim()
+    .allow('')
+    .max(255)
+    .pattern(/^[^<>]*$/, 'no angle brackets')
+    .messages({ 'string.pattern.name': 'Title cannot contain the characters < or >' }),
   content: Joi.string().allow('').max(1_000_000),
   color: Joi.string().valid(...NOTE_COLORS),
   isPinned: Joi.boolean(),
