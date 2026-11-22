@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import { sanitizeContent, sanitizeTitle } from '../src/utils/sanitize';
+import { MAX_TITLE_LENGTH, sanitizeContent, sanitizeTitle } from '../src/utils/sanitize';
 
 describe('sanitize utils', () => {
   it('keeps safe formatting tags', () => {
@@ -13,5 +13,14 @@ describe('sanitize utils', () => {
 
   it('strips all tags from titles', () => {
     expect(sanitizeTitle('<b>Plan</b> <i>A</i>')).to.equal('Plan A');
+  });
+
+  it('keeps ampersands and quotes in titles as plain characters', () => {
+    expect(sanitizeTitle('Tom & Jerry "live"')).to.equal('Tom & Jerry "live"');
+  });
+
+  it('never returns a title longer than the database column', () => {
+    const title = sanitizeTitle('&'.repeat(300));
+    expect(title.length).to.equal(MAX_TITLE_LENGTH);
   });
 });

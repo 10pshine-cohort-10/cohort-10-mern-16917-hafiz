@@ -18,6 +18,13 @@ describe('Auth routes', () => {
         expect(res.body.details).to.be.an('array');
       }));
 
+  it('POST /api/auth/login returns 400 when the body is missing', () =>
+    request(app)
+      .post('/api/auth/login')
+      .then((res) => {
+        expect(res.status).to.equal(400);
+      }));
+
   it('GET /api/auth/me returns 401 without a token', () =>
     request(app)
       .get('/api/auth/me')
@@ -50,6 +57,14 @@ describe('Notes routes', () => {
       .then((res) => {
         expect(res.status).to.equal(400);
         expect(res.body.details).to.be.an('array');
+      }));
+
+  it('POST /api/notes/import returns 400 when the body is missing', () =>
+    request(app)
+      .post('/api/notes/import')
+      .set(auth)
+      .then((res) => {
+        expect(res.status).to.equal(400);
       }));
 
   it('PUT /api/notes/:id rejects an empty body', () =>

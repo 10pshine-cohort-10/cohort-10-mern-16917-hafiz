@@ -34,7 +34,11 @@ const errorHandler = (err: HttpError, req: Request, res: Response, _next: NextFu
     message = 'Request body is too large';
   }
 
-  const logPayload = { err, statusCode, method: req.method, url: req.originalUrl };
+  // Body-parser attaches the rejected raw body to parse errors, so never log the error object for them.
+  const logPayload =
+    err.type === 'entity.parse.failed'
+      ? { statusCode, method: req.method, url: req.originalUrl, errorType: err.type }
+      : { err, statusCode, method: req.method, url: req.originalUrl };
   if (statusCode >= 500) {
     logger.error(logPayload, 'Unhandled server error');
   } else {

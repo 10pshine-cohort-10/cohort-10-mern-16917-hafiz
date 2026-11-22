@@ -3,6 +3,7 @@ import jwt, { SignOptions } from 'jsonwebtoken';
 import env from '../config/env';
 import logger from '../config/logger';
 import AppError from '../utils/AppError';
+import { handleServiceError } from '../utils/handleServiceError';
 import userRepository from '../repositories/userRepository';
 import User from '../models/User';
 
@@ -33,43 +34,55 @@ const signToken = (userId: number): string =>
   });
 
 const signup = async (name: string, email: string, password: string): Promise<AuthResult> => {
-  const normalizedEmail = email.trim().toLowerCase();
+  try {
+    const normalizedEmail = email.trim().toLowerCase();
 
-  const existing = await userRepository.findByEmail(normalizedEmail);
-  if (existing) {
-    throw new AppError('An account with this email already exists', 409);
+    const existing = await userRepository.findByEmail(normalizedEmail);
+    if (existing) {
+      throw new AppError('An account with this email already exists', 409);
+    }
+
+    const hashed = await bcrypt.hash(password, SALT_ROUNDS);
+    const user = await userRepository.create({
+      name: name.trim(),
+      email: normalizedEmail,
+      password: hashed,
+    });
+
+    logger.info({ userId: user.id }, 'User signed up');
+    return { user: toSafeUser(user), token: signToken(user.id) };
+  } catch (error) {
+    return handleServiceError(error, 'auth.signup');
   }
-
-  const hashed = await bcrypt.hash(password, SALT_ROUNDS);
-  const user = await userRepository.create({
-    name: name.trim(),
-    email: normalizedEmail,
-    password: hashed,
-  });
-
-  logger.info({ userId: user.id }, 'User signed up');
-  return { user: toSafeUser(user), token: signToken(user.id) };
 };
 
 const login = async (email: string, password: string): Promise<AuthResult> => {
-  const user = await userRepository.findByEmail(email.trim().toLowerCase());
-  const passwordMatches = user ? await bcrypt.compare(password, user.password) : false;
+  try {
+    const user = await userRepository.findByEmail(email.trim().toLowerCase());
+    const passwordMatches = user ? await bcrypt.compare(password, user.password) : false;
 
-  if (!user || !passwordMatches) {
-    logger.warn('Failed login attempt');
-    throw new AppError('Invalid email or password', 401);
+    if (!user || !passwordMatches) {
+      logger.warn('Failed login attempt');
+      throw new AppError('Invalid email or password', 401);
+    }
+
+    logger.info({ userId: user.id }, 'User logged in');
+    return { user: toSafeUser(user), token: signToken(user.id) };
+  } catch (error) {
+    return handleServiceError(error, 'auth.login');
   }
-
-  logger.info({ userId: user.id }, 'User logged in');
-  return { user: toSafeUser(user), token: signToken(user.id) };
 };
 
 const getProfile = async (userId: number): Promise<SafeUser> => {
-  const user = await userRepository.findById(userId);
-  if (!user) {
-    throw new AppError('User not found', 404);
+  try {
+    const user = await userRepository.findById(userId);
+    if (!user) {
+      throw new AppError('User not found', 404);
+    }
+    return toSafeUser(user);
+  } catch (error) {
+    return handleServiceError(error, 'auth.getProfile');
   }
-  return toSafeUser(user);
 };
 
 const authService = { signup, login, getProfile };

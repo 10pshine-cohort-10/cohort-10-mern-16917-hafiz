@@ -41,9 +41,9 @@ const findOne = (id: number, userId: number): Promise<Note | null> =>
 
 const create = (userId: number, data: NoteData): Promise<Note> => Note.create({ userId, ...data });
 
-const update = async (note: Note, data: Partial<NoteData>): Promise<Note> => note.update(data);
+const update = (note: Note, data: Partial<NoteData>): Promise<Note> => note.update(data);
 
-const remove = async (note: Note): Promise<void> => note.destroy();
+const remove = (note: Note): Promise<void> => note.destroy();
 
 const bulkCreate = (userId: number, items: NoteData[]): Promise<Note[]> =>
   Note.bulkCreate(items.map((item) => ({ userId, ...item })));

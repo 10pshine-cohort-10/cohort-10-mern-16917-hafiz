@@ -5,7 +5,7 @@ export const signupSchema = Joi.object({
   email: Joi.string().trim().email().max(150).required(),
   password: Joi.string()
     .min(8)
-    .max(72)
+    .max(72, 'utf8')
     .pattern(/[A-Za-z]/, 'letter')
     .pattern(/\d/, 'number')
     .required()

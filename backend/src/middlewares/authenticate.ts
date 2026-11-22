@@ -1,13 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
+import type { ParamsDictionary } from 'express-serve-static-core';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import env from '../config/env';
 import AppError from '../utils/AppError';
 
-export interface AuthRequest extends Request {
+export interface AuthRequest<TBody = unknown> extends Request<ParamsDictionary, unknown, TBody> {
   userId?: number;
 }
 
-export const getUserId = (req: AuthRequest): number => {
+export const getUserId = (req: AuthRequest<unknown>): number => {
   if (!req.userId) {
     throw new AppError('Authentication required', 401);
   }

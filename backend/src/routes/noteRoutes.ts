@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import asyncHandler from '../utils/asyncHandler';
 import validate from '../middlewares/validate';
 import authenticate from '../middlewares/authenticate';
 import { createNoteSchema, updateNoteSchema, importNotesSchema } from '../validators/noteValidators';
@@ -17,12 +16,12 @@ const router = Router();
 
 router.use(authenticate);
 
-router.get('/', asyncHandler(listNotes));
-router.get('/export', asyncHandler(exportNotes));
-router.post('/import', validate(importNotesSchema), asyncHandler(importNotes));
-router.post('/', validate(createNoteSchema), asyncHandler(createNote));
-router.get('/:id', asyncHandler(getNote));
-router.put('/:id', validate(updateNoteSchema), asyncHandler(updateNote));
-router.delete('/:id', asyncHandler(deleteNote));
+router.get('/', listNotes);
+router.get('/export', exportNotes);
+router.post('/import', validate(importNotesSchema), importNotes);
+router.post('/', validate(createNoteSchema), createNote);
+router.get('/:id', getNote);
+router.put('/:id', validate(updateNoteSchema), updateNote);
+router.delete('/:id', deleteNote);
 
 export default router;

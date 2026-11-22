@@ -1,5 +1,4 @@
 import { Router } from 'express';
-import asyncHandler from '../utils/asyncHandler';
 import validate from '../middlewares/validate';
 import authenticate from '../middlewares/authenticate';
 import { authLimiter } from '../middlewares/rateLimiter';
@@ -8,8 +7,8 @@ import { signup, login, me } from '../controllers/authController';
 
 const router = Router();
 
-router.post('/signup', authLimiter, validate(signupSchema), asyncHandler(signup));
-router.post('/login', authLimiter, validate(loginSchema), asyncHandler(login));
-router.get('/me', authenticate, asyncHandler(me));
+router.post('/signup', authLimiter, validate(signupSchema), signup);
+router.post('/login', authLimiter, validate(loginSchema), login);
+router.get('/me', authenticate, me);
 
 export default router;
