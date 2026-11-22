@@ -7,7 +7,8 @@ const ALLOWED_TAGS = [
 
 export const MAX_TITLE_LENGTH = 255;
 
-const TAG_PATTERN = /<[^>]*>/g;
+// Matches real HTML tags only: "<" (or "</") must be followed by a letter, so "a < b and c > d" is untouched.
+const TAG_PATTERN = /<\/?[A-Za-z][^<>]*>/g;
 
 /** Rich-text notes are stored as HTML, so strip everything except a safe whitelist. */
 export const sanitizeContent = (html: string): string =>

@@ -24,11 +24,23 @@ describe('sanitize utils', () => {
   });
 
   it('is idempotent, so exported titles survive a re-import unchanged', () => {
-    const samples = ['&lt;b&gt;Plan&lt;/b&gt;', '<b>Plan</b>', 'Tom & Jerry', 'a < b and c > d', '  padded  '];
+    const samples = [
+      '&lt;b&gt;Plan&lt;/b&gt;',
+      '<b>Plan</b>',
+      'Tom & Jerry',
+      'a < b and c > d',
+      '<<b>script>x</script>',
+      '  padded  ',
+    ];
     samples.forEach((sample) => {
       const once = sanitizeTitle(sample);
       expect(sanitizeTitle(once)).to.equal(once);
     });
+  });
+
+  it('keeps comparison text that only looks like markup', () => {
+    expect(sanitizeTitle('a < b and c > d')).to.equal('a < b and c > d');
+    expect(sanitizeTitle('x <3 y > z')).to.equal('x <3 y > z');
   });
 
   it('keeps escaped text that is not real markup exactly as typed', () => {
