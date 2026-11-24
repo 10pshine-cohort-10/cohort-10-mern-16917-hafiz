@@ -46,6 +46,24 @@ describe('tokenStorage', () => {
     expect(readToken()).toBeNull();
   });
 
+
+    test('does not resurrect a token when saving worked but removal fails', () => {
+    saveToken('abc');
+    block('removeItem');
+    clearToken();
+    expect(readToken()).toBeNull();
+  });
+
+  test('a later successful save restores storage-backed reads', () => {
+    saveToken('abc');
+    block('removeItem');
+    clearToken();
+    jest.restoreAllMocks();
+    saveToken('def');
+    expect(readToken()).toBe('def');
+    expect(localStorage.getItem(TOKEN_KEY)).toBe('def');
+  });
+  
   test('respects a logout done in another tab while storage works', () => {
     saveToken('abc');
     localStorage.removeItem(TOKEN_KEY);

@@ -32,6 +32,7 @@ export const clearToken = (): void => {
   try {
     localStorage.removeItem(TOKEN_KEY);
   } catch {
-    /* the in-memory copy is already cleared */
+    // The stored copy could not be removed, so ignore storage until the next successful save.
+    storageWritable = false;
   }
 };
