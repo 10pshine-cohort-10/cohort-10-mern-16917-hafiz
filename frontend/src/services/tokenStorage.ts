@@ -1,29 +1,37 @@
 export const TOKEN_KEY = 'notes_app_token';
 
 /**
- * Storage can be unavailable (private mode, blocked cookies, quota errors).
- * These helpers never throw, so the app keeps working with an in-memory session.
+ * Storage can be unavailable (private mode, blocked cookies, quota errors). When it is, the
+ * token is kept in memory for the current page session so authenticated requests keep working.
+ * While storage works it stays the single source of truth, so a logout in another tab is respected.
  */
+let memoryToken: string | null = null;
+let storageWritable = true;
+
 export const readToken = (): string | null => {
+  if (!storageWritable) return memoryToken;
   try {
     return localStorage.getItem(TOKEN_KEY);
   } catch {
-    return null;
+    return memoryToken;
   }
 };
 
 export const saveToken = (token: string): void => {
+  memoryToken = token;
   try {
     localStorage.setItem(TOKEN_KEY, token);
+    storageWritable = true;
   } catch {
-    /* session lives in memory only */
+    storageWritable = false;
   }
 };
 
 export const clearToken = (): void => {
+  memoryToken = null;
   try {
     localStorage.removeItem(TOKEN_KEY);
   } catch {
-    /* nothing to clear */
+    /* the in-memory copy is already cleared */
   }
 };

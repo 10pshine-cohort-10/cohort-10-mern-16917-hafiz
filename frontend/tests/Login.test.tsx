@@ -43,6 +43,12 @@ describe('Login page', () => {
     });
   });
 
+  test('marks both fields as required', () => {
+    renderLogin();
+    expect(screen.getByLabelText(/email/i)).toBeRequired();
+    expect(screen.getByLabelText(/password/i)).toBeRequired();
+  });
+
   test('submits valid credentials', () => {
     const login = renderLogin();
     return userEvent

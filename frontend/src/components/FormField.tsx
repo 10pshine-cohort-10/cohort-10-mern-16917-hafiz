@@ -9,6 +9,7 @@ interface FormFieldProps {
   placeholder?: string;
   autoComplete?: string;
   error?: string;
+  required?: boolean;
   children?: ReactNode;
 }
 
@@ -22,6 +23,7 @@ export function FormField({
   placeholder,
   autoComplete,
   error,
+  required = false,
   children,
 }: FormFieldProps) {
   const errorId = `${id}-error`;
@@ -35,6 +37,7 @@ export function FormField({
         value={value}
         placeholder={placeholder}
         autoComplete={autoComplete}
+        required={required}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? errorId : undefined}
         onChange={(e) => onChange(e.target.value)}

@@ -84,6 +84,20 @@ describe('AuthProvider', () => {
       .then((el) => expect(el).toBeInTheDocument());
   });
 
+  test('stops loading when the token disappears before a retry', () => {
+    localStorage.setItem(TOKEN_KEY, 'good-token');
+    mocked.me.mockRejectedValue(httpError(503));
+    renderProbe();
+    return screen
+      .findByText('unavailable')
+      .then(() => {
+        localStorage.removeItem(TOKEN_KEY); // for example a logout in another tab
+        return userEvent.click(screen.getByRole('button', { name: /retry/i }));
+      })
+      .then(() => screen.findByText('anonymous'))
+      .then((el) => expect(el).toBeInTheDocument());
+  });
+
   test('a slow session check cannot undo a logout', () => {
     localStorage.setItem(TOKEN_KEY, 'saved-token');
     let resolveMe: (value: User) => void = () => undefined;

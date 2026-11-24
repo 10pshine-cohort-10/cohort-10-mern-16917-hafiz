@@ -44,6 +44,7 @@ export default function Login() {
     <AuthShell title="Welcome back" subtitle="Log in to access your notes.">
       <form onSubmit={handleSubmit} noValidate className="form">
         <FormField
+          required
           id="email"
           label="Email"
           type="email"
@@ -54,6 +55,7 @@ export default function Login() {
           error={errors.email}
         />
         <FormField
+          required
           id="password"
           label="Password"
           type="password"

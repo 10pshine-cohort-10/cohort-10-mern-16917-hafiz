@@ -47,7 +47,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (readToken() === null) return;
+    if (readToken() === null) {
+      // The token can disappear while a retry is pending (for example a logout in another tab).
+      setLoading(false);
+      return;
+    }
     const version = sessionVersion.current;
     authService
       .me()

@@ -50,6 +50,13 @@ describe('Signup page', () => {
     });
   });
 
+  test('marks every field as required', () => {
+    renderSignup();
+    [/full name/i, /^email/i, /^password/i, /confirm password/i].forEach((label) => {
+      expect(screen.getByLabelText(label)).toBeRequired();
+    });
+  });
+
   test('rejects mismatched passwords', () => {
     const signup = renderSignup();
     return fill('Hafiz', 'h@example.com', 'Password123', 'Password124').then(() => {

@@ -61,6 +61,7 @@ export default function Signup() {
     <AuthShell title="Create your account" subtitle="Start organising your notes in seconds.">
       <form onSubmit={handleSubmit} noValidate className="form">
         <FormField
+          required
           id="name"
           label="Full name"
           autoComplete="name"
@@ -70,6 +71,7 @@ export default function Signup() {
           error={errors.name}
         />
         <FormField
+          required
           id="email"
           label="Email"
           type="email"
@@ -80,6 +82,7 @@ export default function Signup() {
           error={errors.email}
         />
         <FormField
+          required
           id="password"
           label="Password"
           type="password"
@@ -101,6 +104,7 @@ export default function Signup() {
           )}
         </FormField>
         <FormField
+          required
           id="confirm"
           label="Confirm password"
           type="password"
