@@ -10,7 +10,7 @@ const renderLogin = (login = jest.fn().mockResolvedValue(undefined)) => {
   render(
     <ThemeProvider>
       <ToastProvider>
-        <AuthContext.Provider value={{ user: null, loading: false, login, signup: jest.fn(), logout: jest.fn() }}>
+        <AuthContext.Provider value={{ user: null, loading: false, login, signup: jest.fn(), logout: jest.fn(), unavailable: false, retry: jest.fn() }}>
           <MemoryRouter>
             <Login />
           </MemoryRouter>
@@ -30,6 +30,16 @@ describe('Login page', () => {
       expect(screen.getByText(/enter a valid email/i)).toBeInTheDocument();
       expect(screen.getByText(/password is required/i)).toBeInTheDocument();
       expect(login).not.toHaveBeenCalled();
+    });
+  });
+
+  test('exposes validation errors to assistive technology', () => {
+    renderLogin();
+    return submit().then(() => {
+      const email = screen.getByLabelText(/email/i);
+      expect(email).toHaveAttribute('aria-invalid', 'true');
+      expect(email).toHaveAccessibleDescription(/enter a valid email/i);
+      expect(screen.getByLabelText(/password/i)).toHaveAttribute('aria-invalid', 'true');
     });
   });
 

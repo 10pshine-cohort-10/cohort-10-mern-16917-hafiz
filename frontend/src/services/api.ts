@@ -1,12 +1,12 @@
 import axios from 'axios';
+import { readToken } from './tokenStorage';
 
-export const TOKEN_KEY = 'notes_app_token';
 export const AUTH_EXPIRED_EVENT = 'notes:auth-expired';
 
 const api = axios.create({ baseURL: '/api', timeout: 15000 });
 
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem(TOKEN_KEY);
+  const token = readToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -23,6 +23,10 @@ api.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+/** True only when the server explicitly says the saved session is no longer valid. */
+export const isSessionRejected = (error: unknown): boolean =>
+  axios.isAxiosError(error) && [401, 404].includes(error.response?.status ?? 0);
 
 export const getErrorMessage = (error: unknown, fallback = 'Something went wrong. Please try again.'): string => {
   if (axios.isAxiosError(error)) {

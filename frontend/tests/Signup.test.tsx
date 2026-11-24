@@ -10,7 +10,7 @@ const renderSignup = (signup = jest.fn().mockResolvedValue(undefined)) => {
   render(
     <ThemeProvider>
       <ToastProvider>
-        <AuthContext.Provider value={{ user: null, loading: false, login: jest.fn(), signup, logout: jest.fn() }}>
+        <AuthContext.Provider value={{ user: null, loading: false, login: jest.fn(), signup, logout: jest.fn(), unavailable: false, retry: jest.fn() }}>
           <MemoryRouter>
             <Signup />
           </MemoryRouter>
@@ -37,6 +37,16 @@ describe('Signup page', () => {
       expect(screen.getByText(/enter a valid email/i)).toBeInTheDocument();
       expect(screen.getByText(/8\+ characters/i)).toBeInTheDocument();
       expect(signup).not.toHaveBeenCalled();
+    });
+  });
+
+  test('exposes validation errors to assistive technology', () => {
+    renderSignup();
+    return userEvent.click(screen.getByRole('button', { name: /create account/i })).then(() => {
+      [/full name/i, /^email/i, /^password/i].forEach((label) => {
+        expect(screen.getByLabelText(label)).toHaveAttribute('aria-invalid', 'true');
+      });
+      expect(screen.getByLabelText(/full name/i)).toHaveAccessibleDescription(/at least 2 characters/i);
     });
   });
 

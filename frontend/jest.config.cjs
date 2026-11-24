@@ -15,7 +15,7 @@ module.exports = {
           esModuleInterop: true,
           skipLibCheck: true,
           strict: true,
-          types: ['jest', 'node'],
+          types: ['jest', 'node', '@testing-library/jest-dom'],
         },
       },
     ],

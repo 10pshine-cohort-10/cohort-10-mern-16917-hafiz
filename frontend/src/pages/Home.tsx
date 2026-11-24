@@ -11,7 +11,7 @@ export default function Home() {
         <Icon name="sparkles" size={32} />
       </div>
       <h1>
-        {greeting()}, {user?.name.split(' ')[0]} 👋
+        {greeting()}, {user?.name.split(' ')[0]}
       </h1>
       <p className="muted">You are signed in. Your notes dashboard arrives in the next release.</p>
     </section>

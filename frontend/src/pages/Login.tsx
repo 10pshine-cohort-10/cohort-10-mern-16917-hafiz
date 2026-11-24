@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthShell } from '../components/AuthShell';
+import { FormField } from '../components/FormField';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { getErrorMessage } from '../services/api';
@@ -42,16 +43,26 @@ export default function Login() {
   return (
     <AuthShell title="Welcome back" subtitle="Log in to access your notes.">
       <form onSubmit={handleSubmit} noValidate className="form">
-        <div className="field">
-          <label htmlFor="email">Email</label>
-          <input id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
-          {errors.email && <span className="field-error">{errors.email}</span>}
-        </div>
-        <div className="field">
-          <label htmlFor="password">Password</label>
-          <input id="password" type="password" autoComplete="current-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" />
-          {errors.password && <span className="field-error">{errors.password}</span>}
-        </div>
+        <FormField
+          id="email"
+          label="Email"
+          type="email"
+          autoComplete="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={setEmail}
+          error={errors.email}
+        />
+        <FormField
+          id="password"
+          label="Password"
+          type="password"
+          autoComplete="current-password"
+          placeholder="Your password"
+          value={password}
+          onChange={setPassword}
+          error={errors.password}
+        />
         <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
           {submitting ? 'Logging in…' : 'Log in'}
         </button>

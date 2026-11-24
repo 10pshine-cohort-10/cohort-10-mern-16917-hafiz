@@ -31,7 +31,7 @@ export function AuthShell({ title, subtitle, children }: AuthShellProps) {
           </li>
         </ul>
       </aside>
-      <section className="auth-panel">
+      <main className="auth-panel">
         <div className="auth-toggle">
           <ThemeToggle />
         </div>
@@ -40,7 +40,7 @@ export function AuthShell({ title, subtitle, children }: AuthShellProps) {
           <p className="muted">{subtitle}</p>
           {children}
         </div>
-      </section>
+      </main>
     </div>
   );
 }

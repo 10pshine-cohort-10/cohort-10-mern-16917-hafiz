@@ -1,51 +1,70 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import authService from '../services/authService';
-import { AUTH_EXPIRED_EVENT, TOKEN_KEY } from '../services/api';
+import { AUTH_EXPIRED_EVENT, isSessionRejected } from '../services/api';
+import { clearToken, readToken, saveToken } from '../services/tokenStorage';
 import type { AuthResult, User } from '../types';
 
 interface AuthContextValue {
   user: User | null;
   loading: boolean;
+  /** True when a saved session could not be verified because the server was unreachable. */
+  unavailable: boolean;
   login: (email: string, password: string) => Promise<void>;
   signup: (name: string, email: string, password: string) => Promise<void>;
   logout: () => void;
+  retry: () => void;
 }
 
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState<boolean>(() => localStorage.getItem(TOKEN_KEY) !== null);
+  const [loading, setLoading] = useState<boolean>(() => readToken() !== null);
+  const [unavailable, setUnavailable] = useState(false);
+  const [attempt, setAttempt] = useState(0);
+  // Bumped on every login or logout so a slow session check can never overwrite a newer state.
+  const sessionVersion = useRef(0);
 
   const logout = useCallback(() => {
-    localStorage.removeItem(TOKEN_KEY);
+    sessionVersion.current += 1;
+    clearToken();
     setUser(null);
+    setUnavailable(false);
   }, []);
 
   const accept = useCallback((result: AuthResult) => {
-    localStorage.setItem(TOKEN_KEY, result.token);
+    sessionVersion.current += 1;
+    saveToken(result.token);
     setUser(result.user);
+    setUnavailable(false);
+  }, []);
+
+  const retry = useCallback(() => {
+    setUnavailable(false);
+    setLoading(true);
+    setAttempt((n) => n + 1);
   }, []);
 
   useEffect(() => {
-    if (localStorage.getItem(TOKEN_KEY) === null) return;
-    let cancelled = false;
+    if (readToken() === null) return;
+    const version = sessionVersion.current;
     authService
       .me()
       .then((u) => {
-        if (!cancelled) setUser(u);
+        if (version === sessionVersion.current) setUser(u);
       })
-      .catch(() => {
-        if (!cancelled) logout();
+      .catch((error: unknown) => {
+        if (version !== sessionVersion.current) return;
+        if (isSessionRejected(error)) {
+          logout();
+        } else {
+          // Timeouts and 5xx responses do not prove the token is bad, so keep it and offer a retry.
+          setUnavailable(true);
+        }
       })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [logout]);
+      .finally(() => setLoading(false));
+  }, [logout, attempt]);
 
   useEffect(() => {
     window.addEventListener(AUTH_EXPIRED_EVENT, logout);
@@ -62,7 +81,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [accept],
   );
 
-  const value = useMemo(() => ({ user, loading, login, signup, logout }), [user, loading, login, signup, logout]);
+  const value = useMemo(
+    () => ({ user, loading, unavailable, login, signup, logout, retry }),
+    [user, loading, unavailable, login, signup, logout, retry],
+  );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

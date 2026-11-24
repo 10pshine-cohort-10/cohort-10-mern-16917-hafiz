@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthShell } from '../components/AuthShell';
+import { FormField } from '../components/FormField';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import { getErrorMessage } from '../services/api';
@@ -59,19 +60,35 @@ export default function Signup() {
   return (
     <AuthShell title="Create your account" subtitle="Start organising your notes in seconds.">
       <form onSubmit={handleSubmit} noValidate className="form">
-        <div className="field">
-          <label htmlFor="name">Full name</label>
-          <input id="name" autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Hafiz M Faizan" />
-          {errors.name && <span className="field-error">{errors.name}</span>}
-        </div>
-        <div className="field">
-          <label htmlFor="email">Email</label>
-          <input id="email" type="email" autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
-          {errors.email && <span className="field-error">{errors.email}</span>}
-        </div>
-        <div className="field">
-          <label htmlFor="password">Password</label>
-          <input id="password" type="password" autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 8 characters" />
+        <FormField
+          id="name"
+          label="Full name"
+          autoComplete="name"
+          placeholder="Hafiz M Faizan"
+          value={name}
+          onChange={setName}
+          error={errors.name}
+        />
+        <FormField
+          id="email"
+          label="Email"
+          type="email"
+          autoComplete="email"
+          placeholder="you@example.com"
+          value={email}
+          onChange={setEmail}
+          error={errors.email}
+        />
+        <FormField
+          id="password"
+          label="Password"
+          type="password"
+          autoComplete="new-password"
+          placeholder="At least 8 characters"
+          value={password}
+          onChange={setPassword}
+          error={errors.password}
+        >
           {password && (
             <div className="strength" aria-live="polite">
               <div className="strength-bars">
@@ -82,13 +99,17 @@ export default function Signup() {
               <span className="muted small">{strength.label}</span>
             </div>
           )}
-          {errors.password && <span className="field-error">{errors.password}</span>}
-        </div>
-        <div className="field">
-          <label htmlFor="confirm">Confirm password</label>
-          <input id="confirm" type="password" autoComplete="new-password" value={confirm} onChange={(e) => setConfirm(e.target.value)} placeholder="Repeat your password" />
-          {errors.confirm && <span className="field-error">{errors.confirm}</span>}
-        </div>
+        </FormField>
+        <FormField
+          id="confirm"
+          label="Confirm password"
+          type="password"
+          autoComplete="new-password"
+          placeholder="Repeat your password"
+          value={confirm}
+          onChange={setConfirm}
+          error={errors.confirm}
+        />
         <button type="submit" className="btn btn-primary btn-block" disabled={submitting}>
           {submitting ? 'Creating account…' : 'Create account'}
         </button>
